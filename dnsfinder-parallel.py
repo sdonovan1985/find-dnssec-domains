@@ -7,6 +7,7 @@ import dns.rdatatype
 import sys
 from datetime import datetime
 
+#Rework of the dnsfinder so that it can be run in parallel more easily.
 
 
 # Based on some of the code in;
@@ -87,18 +88,20 @@ def get_dnssec_status(dnsresolver, domain_name):
 
 if __name__ == "__main__":
     print len(sys.argv)
-    if not (len(sys.argv) == 2 or len(sys.argv) == 3):
+    if not (len(sys.argv) == 3 or len(sys.argv) == 4):
         print "Syntax:"
-        print "    dnsfinder <# of entries> <optional:sourcefile>"
+        print "    dnsfinder <start-entry> <# of entries> <optional:sourcefile>"
         print " sourcefile must be in a csv format with the domain in the"
         print " second column. Otherwise, will use the file:"
         print "    alexa-files/top-1m.csv"
+        print " start-entry starts at 1, not 0."
         exit()
 
-    linecount = int(sys.argv[1])
+    startline = int(sys.argv[1])
+    linecount = int(sys.argv[2])
     filename = "alexa-files/top-1m.csv"
-    if len(sys.argv) == 3:
-        filename = sys.argv[2]
+    if len(sys.argv) == 4:
+        filename = sys.argv[3]
 
     # Thanks to https://stackoverflow.com/questions/9135936/want-datetime-in-logfile-name
     logfilename = datetime.now().strftime('results_%Y_%m_%d_%H_%M_%S.log')
@@ -118,8 +121,12 @@ if __name__ == "__main__":
 
     for line in input_file:
         linenum += 1
-        if linenum > linecount:
+        if linenum >= linecount + startline:
             break
+        if linenum < startline:
+            # skip the first <startline> lines
+            continue
+        
         entries = line.split(",")
         domain_name = entries[1].strip()
         print "Looking at " + domain_name
