@@ -5,7 +5,7 @@ from datetime import datetime
 
 def get_dig_cmd_output(cmd, domain):
     final_cmd = cmd
-    final_cmd.append(domain)
+    final_cmd[-1] = domain
     output = subprocess.check_output(final_cmd)
     return output
 
@@ -37,7 +37,7 @@ if __name__ == "__main__":
     logfilename = datetime.now().strftime('digfile_%Y_%m_%d_%H_%M_%S.log')
 
     # Add whatever dig commands necessary:
-    digcmd = ["dig", "@192.168.56.101", "+dnssec"]
+    digcmd = ["dig", "@192.168.56.101", "+dnssec", "example.com"]
 
     input_file = open(filename, "r")
     log_file = open(logfilename, "w")
