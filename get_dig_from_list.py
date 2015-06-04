@@ -15,6 +15,9 @@ def log_output(filename, output):
 
     filename.write("\n\n\n")
 
+def log_error(filename, domain):
+    filename.write("Error with dig of: " + domain + "\n")
+    filename.write("\n\n\n")
 
 
 if __name__ == "__main__":
@@ -38,6 +41,7 @@ if __name__ == "__main__":
 
     # Add whatever dig commands necessary:
     digcmd = ["dig", "@192.168.56.101", "+dnssec", "example.com"]
+#    digcmd = ["dig", "@dns1.gatech.edu", "+dnssec", "example.com"]
 
     input_file = open(filename, "r")
     log_file = open(logfilename, "w")
@@ -54,11 +58,14 @@ if __name__ == "__main__":
         
         entries = line.split(",")
         domain_name = entries[1].strip()
-        print "Looking at " + domain_name
+        print "Looking at " + domain_name + ", " + entries[0].strip()
 
-        output = get_dig_cmd_output(digcmd, domain_name)
-        log_output(log_file, output)
-        #do any processing of output here
+        try:
+            output = get_dig_cmd_output(digcmd, domain_name)
+            log_output(log_file, output)
+            #do any processing of output here
+        except:
+            log_error(log_file, domain_name)
 
         
     input_file.close()
